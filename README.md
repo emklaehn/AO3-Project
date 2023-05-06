@@ -2,7 +2,7 @@
 
 ---
 
-This is a project where I scrape and analyze data from AO3 (Archive of Our Own). AO3 is a popular website containing tons of fanfiction data. More of the data is discussed in the R Markdown code or Word document, called "AO3-final.Rmd" or "AO3-final.docx".
+This is a project where I scrape and analyze data from AO3 (Archive of Our Own). AO3 is a popular website containing tons of fanfiction data. More of the data is discussed in the R Markdown code or HTML, called "AO3-final.Rmd" or "AO3-final.html".
 
 ### Web Scraping the Data
 
