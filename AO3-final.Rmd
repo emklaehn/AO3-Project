@@ -1,0 +1,984 @@
+---
+title: "AO3-Final"
+author: "Ela Klaehn"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+# Research Question
+
+## What is AO3?
+
+Archive of Our Own, or AO3, is a website that houses one of the largest amounts of fiction, specially it focuses on fanfiction. Fanfiction is a piece of fiction from usually pre-existing TV shows, books, or other types of media that is written by a fan. This works can twist the certain canon of the piece of media or it can take the characters and put them in a completely new situation.
+
+## Why AO3?
+
+Physical book data can be hard to gather, especially trying to find accurate numbers since books can be bought or borrowed, but with AO3, since everything is digital, it is very easy to find the number of views a certain piece of fiction has or how well received it was (through likes). Although it is a fan site filled with fan-made works, it can still provide a lot of information for writers and companies for these different movies, TV series, and books by finding what the fans and audience tends to like and enjoy on this website. Along with AO3 being capable of tracking the number of views and likes on the fanfiction, the website also has a comprehensive tagging system that the fanfiction authors can use. This tagging system can help to find the main aspects of the work that draws readers to it with tags, such as ‘angst’, ‘fluff’, and ‘alternate universe’.
+
+By using the AO3 data, different popular media companies and independent writers may be able to determine what ideas and concepts may aid in the process of determining how to increase or maximize the number of likes. One can look at the general rating (general audiences, teens and up, mature audiences, etc.), number of comments (to determine engagement), length (with the number of chapters or word count), and several other variables to determine how a book or movie can gain more views. Additionally, this can be beneficial to fanfiction authors and readers if they wish to find out what variables aid most in gaining the most views generally (across all movies, books, and TV shows) or specifically for one book or movie.
+
+## The Question
+
+As stated in the previous section, there are several variables that AO3 tracks. Since AO3 contains copious amounts of fanfiction, this can help to determine how much fan interaction a certain idea or several ideas may have. With this data, I hope to learn what variables, such as number of comments, number of views, or combination of tags, help to best predict the number of likes, meaning I wish to measure the amount of positive fan interaction that a combination of variables may provide. This positive fan interaction can have insight into the next steps that a TV series, movie, or book can take to continue to have avid followers of the series and perhaps bring new viewers/readers into the media’s community. This leads into the overarching question: what are the variables from AO3 data that can help determine the amount of positive fan interaction?
+
+# The Data Set
+
+## Where is the data from?
+
+I used an article from Medium by [Sophia Z.](https://medium.com/nerd-for-tech/mining-fanfics-on-ao3-part-1-data-collection-eac8b5d7a7fa) to create a web scraping Python code, called “WebScraping.ipynb” in the GitHub, to get current data from the AO3 website. The code from Medium provided a skeleton, but I did modify the code to extract some more data. The data that was web scraped was from the [AO3 website](https://archiveofourown.org/works). The dataset includes all of the works that were updated from March 12, 2023 to March 20, 2023. I chose these dates since it will be current data and to limit the amount of data that will be in the dataset; there are a total of 40,037 records in the dataset. To access my specific data set, one can access the file [here](https://drive.google.com/file/d/1zj4q_QqtkZpz7U5FeNxYR9D7rOPG4JkE/view?usp=share_link). Since the file is so large, it cannot be put onto GitHub normally.
+
+## The Variables
+
+The dataset includes numerical, categorical, and other variables. Here are the numerical variables:
+
+* Word_count: This gives the current number of words in the fanfiction.
+* Num_chapters: The number of chapters in the fanfiction.
+* Num_comments: The total number of comments.
+* Num_kudos: The total number of likes (kudos).
+* Num_bookmarks: The number of people who publicly bookmarked the fanfiction.
+* Num_hits: The number of views (hits).
+
+There are also quite a few categorical variables:
+
+* Complete: It states whether or not the fanfiction is complete
+* Warning: This indicates what type of severe content is present in the fanfiction (if any).
+* Pairing: This states whether there are any romantic pairings and what type. 
+    + 'F/M': there is a romantic relationship between a female and male character.
+    + 'M/M': there is a romantic relationship between two male characters.
+    + 'F/F': there is a romantic relationship between two female characters.
+    + 'Gen': no romantic relationships or relationships are not the main focus of the work.
+    + 'Mutli': contains more than one relationship.
+    + 'Other': anything that does not fall into the previous categories.
+* Rating: This gives the general age range the audience should be to read the fanfiction.
+    + 'Explicit': only suitable for adults
+    + 'Mature'
+    + 'Teens and Up Audiences'
+    + 'General Audiences'
+    + 'Not Rated'
+
+Along with all of these variables, there are other variables as well:
+
+* Title: The title of the fanfiction.
+* Author: The author of the fanfiction.
+* ID: A unique identifier for the fanfiction.
+* Fandoms: The states the different books, movies, or TV shows that the fanfiction uses. This can contain one or more fandoms.
+* Date_updated: The day that the fanfiction that was updated.
+* Relationships: This states the different romantic or platonic relationships that is contained in the fanfiction.
+* Characters: This gives the names of all the characters.
+* Tags: Other content identifiers for the fanfiction.
+* Language: This gives the language of the fanfiction. (This only contains 'English' in this dataset.)
+
+## Type of Data
+
+This data easily falls under the cross-sectional data umbrella. A cross-sectional data set consists of a sample of variables at a given point of time. Of course, the time is not necessarily correspond to the exact same time period, just similar times. My data set was accumulated over a nine day period, where each fanfiction is different -- there are no duplicates. It cannot be time series because it does not follow the same variable or several variables over time (collecting data at each new observation), and it cannot be panel (or longitudinal data) because it follows multiple samples over time. 
+
+## Level of Aggregation
+
+The data consists of individual fanfiction data, where each row is a different fanfiction that was updated. It is not filtered by any specific show or rating. Though, the language data was filtered to consist only of fanfiction written in English.
+
+# Data Exploration
+
+## Loading the Data Set
+
+First, I take the CSV file of the web scraped data from AO3 and load it into R. I also save a backup of the data set in case something goes wrong with the original data frame.
+
+```{r }
+ao3 <- read.csv('March2023_AO3.csv')
+# good practice in case something gets messed up in the code later
+ao3_backup <- ao3
+```
+
+## Variables
+
+When we first upload the data frame, one should take a look at the data types of all of the original variables/columns, which can easily be done with the str() command.
+
+```{r }
+str(ao3)
+```
+
+All of the variables are one of two types currently: integer or string. There are several variables that can be converted to a factor type or different type, such as 'Complete' or 'Rating' because they consist of only a few different phrases. Therefore, I will change these variables into factors. The 'Date_updated' column can be converted into a date type for potential use later. Additionally, one can see that the 'Word_count' column is a string even though it should be a numeric value, so this values will be converted from a string into numeric.
+
+Additionally, for the 'Pairing' column, if a record contained more than one pairing type, it lists all of the potential types. For example, a column can contain "'F/M,M/M,Other" or "M/M,Gen,Multi". To deal with all of these variations, any record that contains more than one pairing type will be replaced with 'Multi', indicating that there are multiple different types.
+
+```{r }
+# fix pairing column to have multi
+ao3$Pairing <- gsub('.*,.*', 'Multi', ao3$Pairing)
+
+# change date into Date type
+ao3$Date_updated <- as.Date(ao3$Date_updated, format="%d %B %Y")
+# change categorical variables like Rating and Complete into factors
+ao3$Complete <- as.factor(ao3$Complete)
+ao3$Rating <- as.factor(ao3$Rating)
+ao3$Pairing <- as.factor(ao3$Pairing)
+ao3$Warning <- as.factor(ao3$Warning)
+# convert Word_count column into numeric
+ao3$Word_count <- as.numeric(gsub(",","",ao3$Word_count))
+```
+
+After doing these conversions, one can look to see if there are any new columns that can be created that may be useful for future studying. For example, one can see if a fanfiction includes multiple different fandoms (or TV show, book, or movie communities) by checking the 'Fandoms' column to see if the list contains more than one element. Some other variables to consider is if the fanfiction contains any romantic or platonic relationships to see if these types of relationships can increase positive fan interaction. There are also several numerical columns that can be created to be considered such as the number of romantic or platonic relationships a fanfiction has along with the total number of characters (or number of prominent characters) in the fanfiction.
+
+In AO3, with its tagging system, romantic relationships tend to be indicated with a "/" in between two characters' names while platonic relationships are indicated with "&" between the names. So, to find out if there are any romantic or platonic relationships, one will just need to see if in the 'Relationships' column it contains "/" or "&", and to find the number of each relationship type, one would just need to count the respective symbol. It will be more difficult to determine the number of characters since there is no special symbol associated with it, so I count the number of single quotes and divide it by two (with integer division).
+
+```{r}
+# Create crossover (fanfiction from multiple fandoms) column
+ao3$Is_crossover <- grepl(",",ao3$Fandoms)
+# Create column if fanfiction contains romance
+ao3$Has_romance <- grepl("/", ao3$Relationships)
+# Create column if fanfiction contains platonic relationships
+ao3$Has_platonic <- grepl("&", ao3$Relationships)
+
+# use stringr library to count the occurrance of a pattern
+library(stringr)
+# Number of romantic relationships
+ao3$Num_romance <- str_count(ao3$Relationships, "/")
+# Number of platonic relationships
+ao3$Num_platonic <- str_count(ao3$Relationships, "&")
+# Number of characters in fanfiction
+ao3$Num_characters <- str_count(ao3$Characters, "'") %/% 2
+```
+
+As discussed previously, AO3 has a very expansive and detailed tagging system for the fanfiction authors to use. The authors have a lot of independence in what they can place in the tags, so for the purpose of this project, I will look through all of the potential tags in the data set and determine the frequency of each tag. Before I can determine the frequency, I need to split all of the string-turned arrays to find all of the potential tags in the data set, and I do this by creating a function, called 'listoflists'.
+
+```{r}
+listoflists <- function(col) {
+  a <- gsub('"',"'",col[1])
+  a <- gsub("'\\]","",gsub("\\['","",a))
+  b <- strsplit(a,"', '")
+  list <- b
+  for (i in 2:nrow(ao3)) { # nrow(ao3)
+    a <- gsub('"',"'",col[i])
+    a <- gsub("'\\]","",gsub("\\['","",a))
+    b <- strsplit(a,"', '")
+    list<-c(list,b)
+  }
+  result <- do.call(c,list)
+  # use lowercase so that 'Cute' and 'cute' will be treated the same
+  return(lapply(result,tolower)) 
+}
+```
+
+This function takes each record, splits the string, does some string substitution, and takes the tags and put them into a large array. With this function, I can now find the frequency of all of the different tags in the data frame. Then, I use commands from the 'vctrs' library to determine the frequency of the tags.
+
+```{r}
+# Frequency of Tags
+l<-listoflists(ao3$Tags)
+library(vctrs)
+tags <- vec_count(l)
+```
+
+For the sake of this project, we will only take into account the top five tags in the list, which is listed below.
+
+```{r}
+# Take top five tags
+top_five <- tags[[1]][1:5]
+for (i in top_five) {
+  print(i)
+}
+```
+
+The top five tags, as given above, is 'fluff', 'angst', 'hurt/comfort', 'alternate universe - canon divergence', and 'fluff and angst'. These results are interesting since readers seem to want content that either happy and cute (fluff) or sad and depressing (angst) or a mixture of both. Also, readers tend to want a story that is still similar to the overall story with only some changes (a divergence from the original canon). With these top five tags, we can now create new columns with TRUE or FALSE values, indicating whether or not a tag is used in the fanfiction. Additionally, I will create a column that will be TRUE if the fanfiction contains any of the top five tags to see if that may have an overall impact in the data exploration or model. 
+
+```{r}
+# make tags column lowercase for easier comparison
+ao3$Tags <- tolower(ao3$Tags)
+# make new columns for top 5 tags
+ao3$Fluff <- grepl(top_five[[1]], ao3$Tags)
+ao3$Angst <- grepl(top_five[[2]], ao3$Tags)
+ao3$Hurt_comfort <- grepl(top_five[[3]], ao3$Tags)
+ao3$AU <- grepl(top_five[[4]], ao3$Tags)
+ao3$Fluff_angst <- grepl(top_five[[5]], ao3$Tags)
+
+# Create column that is TRUE when fanfiction contains any top five tag
+ao3$Five_tags <- ao3$Fluff | ao3$Angst | ao3$Hurt_comfort | ao3$AU | ao3$Fluff_angst
+```
+
+Finally, we can check all of the new variables and data types using the str() command to make sure all of the column (old and new) are behaving properly.
+
+```{r}
+# check new data types and variables
+str(ao3)
+```
+
+## Missing Values or NAs
+
+After creating and changing all of the variables, one needs to see if there are any NA or missing values in the table.
+
+```{r}
+# find NAs or NULLs in dataset
+which(is.na(ao3))
+```
+
+In this case, we do not have any missing values to worry about, so there is nothing to do there, but we may need to worry about rows that include zeros for the number of views or likes. If there are zeros in the target variable's column, then it can make it difficult to calculate different values later on, such as MAPE, mean absolute percent error. Also, I am hoping to predict positive fan interaction, meaning I am hoping to predict likes above zero, and for the company or person this is presented to, they would be able to achieve at least one like for the idea.
+
+```{r}
+# number of rows with 0 kudos
+nrow(ao3[ao3$Num_kudos==0,])
+```
+
+With the number of records in the data set (40,037 total), one can easily just remove the observations without it impacting the results too heavily.
+
+```{r}
+# remove columns with zero kudos
+ao3 <- ao3[ao3$Num_kudos>0,]
+```
+
+## Summary Statistics
+
+Now, with the cleaned data set, we can look at the summary statistics to see if there is anything interesting happening with the data.
+
+```{r}
+# show summary stats
+summary(ao3)
+```
+
+There are some interesting parts to look at in the summary statistics. A majority of the records in the data set contains at least one romantic relationship, where 77% (29,372 / (29,372 + 8,759)) of the fanfictions contain it, but with platonic relationships, this decreases to 30%. A majority of the stories are rated for teens rather than any of the other ratings, which makes sense because one would try to include as many age groups as possible for the story's reach. Additionally, it seems that the average number of characters (at least prominent characters) in a story is five.
+
+## Exploring the Data Further
+
+Given all of the variables in this data set, there are only a particular number of variables I wish to explore further: rating, pairing, number of comments, number of likes, number of views, whether or not it is a crossover, contains romance and number of relationships, contains platonic relationships and number of relationships, and number of characters. 
+
+Variables like 'Title', 'Author', 'ID', 'Fandom', and 'Date_updated' is not useful in the model I am creating since they are only needed for the website or if I were making a more specific model, such as a tailored model to determine the number of views for something in the *Harry Potter* franchise. While the 'Warning' variable can be useful in some cases, if we look at the summary results in the previous code block, a majority of the records either did not need to use warnings or chose not to use them, so the results can be very skewed. 'Relationships' and 'Characters' are only useful for more fandom-specific models since there are just so many different characters and potential relationships that can be listed (because of all of the unique names), which is why the broader variables, such as 'Has_romance' and 'Num_characters', exist. 'Language' is ignored since it only consists of one value: 'English'. 'Word_count', 'Num_chapters', and 'Complete' can be useful in determining likes or views for books by predicting the optimal number of words and chapter for a book, but since this data set includes fan communities from books, TV shows, and movies, it does not give as much meaning in this case. If the model was more tailored to book-only fandoms, then these variables can be more helpful. 
+
+### Numerical Variables
+
+The numerical variables are 'Num_comments', 'Num_hits', 'Num_bookmarks', 'Num_characters', 'Num_romance', and 'Num_platonic'. We can look at the different numerical variables with histograms and scatter plots. First, we can look at the histograms to see how frequently a value occurs in the data set for a particular variable.
+
+```{r warning=FALSE}
+### Histograms
+# Number of comments
+hist(ao3$"Num_comments")
+# Number of view
+hist(ao3$"Num_hits")
+# Number of likes
+hist(ao3$"Num_kudos")
+# Number of bookmarks
+hist(ao3$"Num_bookmarks")
+# Number of characters
+hist(ao3$"Num_characters")
+# Number of romantic relationships
+hist(ao3$"Num_romance")
+# Number of platonic relationships
+hist(ao3$"Num_platonic")
+```
+
+All of the histograms above show that all of the numerical variables are right-skewed, meaning that the mean is likely to be greater than the median, and most of the data is towards the lower bound of the range. 
+
+Next, we can look at a scatter plot of each of the different numerical variables to see if there is a relationship between number of likes, since this is the target variable, and a specific numerical variable. I use 'ggplot2' to plot the different scatter plots.
+
+```{r warning=FALSE}
+library(ggplot2)
+# Number of comments
+ggplot(ao3, aes(x=Num_comments, y=Num_kudos)) +
+    geom_point() +
+    geom_smooth(method=lm)
+# Number of view
+ggplot(ao3, aes(x=Num_hits, y=Num_kudos)) +
+    geom_point() +
+    geom_smooth(method=lm)
+# Number of bookmarks
+ggplot(ao3, aes(x=Num_bookmarks, y=Num_kudos)) +
+    geom_point() +
+    geom_smooth(method=lm)
+# Number of characters
+ggplot(ao3, aes(x=Num_characters, y=Num_kudos)) +
+    geom_point() +
+    geom_smooth(method=lm)
+# Number of romantic relationships
+ggplot(ao3, aes(x=Num_romance, y=Num_kudos)) +
+    geom_point() +
+    geom_smooth(method=lm)
+# Number of platonic relationships
+ggplot(ao3, aes(x=Num_platonic, y=Num_kudos)) +
+    geom_point() +
+    geom_smooth(method=lm)
+```
+
+Looking at views and bookmarks, there seems to be a linear relationship between them, while for comments, it does seem linear, but it can be argued to have a more quadratic relationship as well -- this can be tested when we make the model. For characters, romantic relationships, and platonic relationships, there does not seem to be a relation between those variables and the number of likes, meaning these may not be good indicators for predicting the number of likes.
+
+### Categorical Variables
+
+For categorical variables, one can use a box and whisker plot to see some basic statistics. This can give insight on how different categories in a categorical variable varies in median and other variables. Additionally, one can use bar graphs to show the total sum of likes between different subcategories of a categorical variable to see if one subcategory has more of an effect than another. The categorical variables in this data set includes 'Has_romance', 'Has_platonic', 'Rating', 'Pairing', 'Is_crossover', 'Fluff', 'Angst', 'Hurt_comfort', 'AU', 'Fluff_angst', and 'Five_tags'.
+
+First, we will look to see if there is a difference in the number of likes if platonic or romance relationships are included in the data set.
+
+```{r warning=FALSE}
+library(plotly)
+
+# Has_romance
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Has_romance,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(title = "Likes by romantic relationship",
+      xaxis = list(title = "Romance",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,250)))
+# bar graph of the sum of likes
+ggplot(ao3, aes(x=Has_romance, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+# Has_platonic
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Has_platonic,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(title = "Likes by platonic relationship",
+      xaxis = list(title = "Platonic",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,300)))
+ggplot(ao3, aes(x=Has_platonic, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+```
+
+For romantic relationships, it seems that there will be a higher median number of likes, but there is not as much of a difference if there is a platonic relationship included when looking at the box plots. With the bar graphs, romantic relationships do have an increase in the number of likes that a fanfiction receives compared to not having one whileit is the opposite for platonic relationships.
+
+Next, one can look at rating. This consists of five subcategories: explicit, mature, teens and up audiences, general audiences, and not rated. With this different ratings, while by themselves, it will be interesting -- it would be interesting to see if there is an effect on likes if were look at rating and whether or not there was a romance relationship.
+
+```{r warning=FALSE}
+# Rating
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Rating,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(boxmode = "group",
+         title = "Likes by rating",
+      xaxis = list(title = "Rating",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,350)))
+ggplot(ao3, aes(x=Rating, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+# Rating and romance
+plot_ly(ao3,
+    y = ~Num_kudos,
+    x = ~Has_romance,
+    color = ~Rating,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(boxmode = "group",
+         title = "Likes by rating and romance",
+      xaxis = list(title = "Has Romance",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,350)))
+```
+
+For the original rating box plot, explicit has the highest median number of likes while the other ratings seem to have fairly similar medians. The other plot with romance and rating contains more exciting details. It seems that fanfiction has an overall higher number of likes if it contains a romantic relationship in general with the highest median number of likes in the explicit category with the mature rating close behind while the box plots for the ratings not including a romantic relationship were fairly similar.
+
+While the original rating box plot indicates that explicit stories will receive more likes, the bar graph states something completely different: the 'Teens and Up Audiences' subcategory by far as the most number of total likes compared to the other ratings, though explicit is close to the same number of likes.
+
+The pairing column is too closely related to the 'Has_romance' column to be compared. If there is a pairing given, it will have a romance relationship because the pairing column indicates the genders of the people in the romantic relationship (if any). Therefore, we will just use a normal plot to look at the column.
+
+```{r}
+# Pairing
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Pairing,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(boxmode = "group",
+         title = "Likes by Pairing",
+      xaxis = list(title = "Pairing",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,300)))
+ggplot(ao3, aes(x=Pairing, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+```
+
+For this column, both box plot and bar graph lead to same conclusion: the 'M/M' pairing is by far the most popular pairing to receive the most number of likes, so if there is a romantic relationship, that pairing would give the most number of likes.
+
+In TV shows or books, there are occasionally episodes that have characters or situations that tend to be common for another show or book, and this is a crossover. This variable will hopefully give some insight whether crossovers tend to be well received by people.
+
+```{r}
+# Is_crossover
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Is_crossover,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(boxmode = "group",
+         title = "Likes by Crossover",
+      xaxis = list(title = "Is_crossover",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,250)))
+ggplot(ao3, aes(x=Is_crossover, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+```
+
+The box plot does not seem to show much of a difference between the number of likes between a fanfiction if it is a crossover or not. Though, the bar graph definitely shows a skew in the direction of non-crossover fanfictions, but this can be due to the number of crossover versus non-crossover fanfictions in the data frame.
+
+```{r}
+# number of crossover fanfictions
+nrow(ao3[ao3$Is_crossover==TRUE,])
+# number of non-crossover fanfictions
+nrow(ao3[ao3$Is_crossover==FALSE,])
+```
+
+From the code above, there are definitely more records of a fanfiction that is not a crossover rather than being a crossover.
+
+The last of the categorical variables all deal with the tags included in the fanfiction. Given the frequency of the tags given earlier in the project, many of these columns may have a similar problem to the 'Is_crossover' column, where there are more stories without the tag than with them, which is why I created the 'Five_tags' column.
+
+First, we can look at all of the box plots for the different tags (excluding the combination tag column).
+
+```{r}
+#Fluff
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Fluff,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(boxmode = "group",
+         title = "Likes by Fluff",
+      xaxis = list(title = "Fluff",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,300)))
+ggplot(ao3, aes(x=Fluff, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+#Angst
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Angst,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(boxmode = "group",
+         title = "Likes by Angst",
+      xaxis = list(title = "Angst",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,350)))
+ggplot(ao3, aes(x=Angst, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+#Hurt_comfort
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Hurt_comfort,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(boxmode = "group",
+         title = "Likes by hurt/comfort",
+      xaxis = list(title = "Hurt_comfort",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,250)))
+ggplot(ao3, aes(x=Hurt_comfort, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+# Fluff_angst
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Fluff_angst,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(boxmode = "group",
+         title = "Likes by fluff and angst",
+      xaxis = list(title = "Fluff_angst",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,350)))
+ggplot(ao3, aes(x=Fluff_angst, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+# Alternate_universe
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~AU,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(title = "Likes by AU",
+      xaxis = list(title = "Alternate universe",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,450)))
+ggplot(ao3, aes(x=AU, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+```
+
+As one can see from the graphs above, while four of the tags (fluff, angst, hurt/comfort, and fluff and angst) all have median likes higher than if the tag was not listed in the fanfiction, overall, in the bar graphs, it is almost impossible to compare the sum number of likes if the tag is include. This is why the top five tags are combined together to see if any combination of those five tags can give a better number of views.
+
+```{r}
+# Five_tags
+plot_ly(ao3,
+    y = ~Num_kudos,
+    color = ~Five_tags,
+    type = "box",
+    boxpoints = 'suspectedoutliers') %>% 
+  layout(title = "Likes by Top Tags",
+      xaxis = list(title = "Top Tags",
+                    zeroline = FALSE),
+      yaxis = list(title = "Likes",
+                    zeroline = FALSE,
+                    range = c(0,300)))
+ggplot(ao3, aes(x=Five_tags, y=Num_kudos)) +
+    geom_bar(stat = "identity", fill='firebrick')
+```
+
+In the box plot, similar to the previous plots, including one of the top five tags in one's fanfiction will sightly increase the median number of likes. Though the data set stats that there are about 19,000 FALSE and 18,000 TRUE entries for the column, the sum number of likes for the fanfiction that include at least one of the top five tags receives more likes compared to the fanfiction that do not inlcude the tags.
+
+After looking at all of the different visualizations for categorical variables, we can use the dplyr library in R to display some numbers for the subcategories of the variables. 
+
+```{r}
+library(dplyr)
+# see stats with Rating
+ao3 %>%
+  group_by(Rating) %>%
+  summarize(mean.kudos = mean(Num_kudos), min.kudos = min(Num_kudos), max.kudos = max(Num_kudos))
+```
+
+For rating, the explicit rating has the highest mean of likes (kudos), but the rating with the highest number of overall likes is a fanfiction that is not rated followed closely by a mature rating fanfiction.
+
+```{r}
+ao3 %>%
+  group_by(Pairing) %>%
+  summarize(mean.kudos = mean(Num_kudos), min.kudos = min(Num_kudos), max.kudos = max(Num_kudos))
+```
+
+Surprisingly, the numerical results for the pairing column show that having multiple types of pairings will give the highest average number of likes while the fanfiction with the highest number of likes overall is part of the 'Gen' pairing, meaning there are no romantic pairings, which is closely followed by the 'Multi' subcategory.
+
+```{r}
+# see stats with the different tags
+ao3 %>%
+  group_by(Fluff,Angst,AU,Hurt_comfort,Fluff_angst,Five_tags) %>%
+  summarize(mean.kudos = mean(Num_kudos), min.kudos = min(Num_kudos), max.kudos = max(Num_kudos))
+```
+
+This way of grouping aids us in understanding exactly which combinations of the top five tags give the highest number of likes. If a fanfiction includes both angst and hurt/comfort, then it will have the highest mean number of likes, followed closely by fanfictions including angst, alternate universe - canon divergence, and hurt/comfort, while the fanfiction with the highest overall number of likes only includes angst.
+
+# Model Selection
+
+Of the different models that were learned about in class, the research question can be most easily answered with a multiple linear regression. There are several strengths of using this model, such as its popularity and adaptability. Additionally, it can provide estimates of the strength and size of the relationships, features, and outcome. Though it is a very common approach for predicting variables, there are also several weaknesses in the model. Linear regression does not handle missing data well, the equation usually needs to be formed by the person, and makes strong assumptions about the data. Luckily, missing data was handled earlier in the code, and there are methods a person can use to determine the best variables to form a model. Some of the assumptions made when choosing a regression model includes little to no multicollinearity, model can be expressed linearly, residuals are normally distributed, and variance of the errors are homoskedastic.
+
+## Choosing the Numerical Variables
+
+To choose the best numerical variables, one should look at the correlation between the target variable and the other variables. We can use the 'psych' library in R to see the different correlations, and it will give insight to see if there are other variables that can cause multicollinearity if put into the model. I use the stars method to show the significance of the correlation in the table.
+
+```{r}
+library(psych)
+pairs.panels(ao3[c("Num_kudos", "Num_bookmarks", "Num_hits", "Num_comments", "Num_romance", "Num_platonic", "Num_characters")], stars = TRUE)
+```
+
+While 'Num_bookmarks' has a high correlation with likes ('Num_kudos'), since there is no real company or media equivalent of the variable, because bookmarks are the number of people who decide to save a fanfiction, it will have to be ignored for the model. 'Num_hits' and 'Num_comments', on the other hand, also have a high correlation and make more sense has variables for a company or author can use to gauge the number of likes. The only worry with using both of the variables is that they are also hgihly correlated with each other, so this may cause multicollinearity in the model. The last three variables involving the relationships and characters have almost no correlation with the target variable, making them very unlikely predictors for the model. Of the numerical variables, 'Num_hits' and 'Num_comments' seem to be the most likely contenders.
+
+## Multicollinearity
+
+To test the multicollinearity between the variables, we can calculate the VIF. A standard rule for VIF is if it is under five, then there is not any multicollinearity.
+
+```{r}
+library(car)
+# make model to test multicollinearity
+m <- lm(Num_kudos ~ Num_hits + Num_comments, data = ao3)
+summary(m)
+vif(m)
+```
+
+Since both of the values are below five, we do not need to worry about multicollinearity.
+
+## Significance of Squared Terms
+
+Next, we need to test if nonlinear terms are needed for the model. To test for squared terms in the model, we can use the Ramsey Reset test, where the null hypothesis is that the linear assumption is correct.
+
+```{r}
+library(lmtest)
+# test number of views
+resettest(Num_kudos ~ Num_hits, power = 2, type = c("fitted", "regressor",
+  "princomp"), data = ao3)
+# test number of comments
+resettest(Num_kudos ~ Num_comments, power = 2, type = c("fitted", "regressor",
+  "princomp"), data = ao3)
+```
+
+According to the test, both numerical variables can benefit the model by  including their non-linear specifications. To best see if they do help the model is to create univariate regressions including the new squared term.
+
+```{r}
+# create squared term for both variables
+ao3$hits2 <- ao3$Num_hits * ao3$Num_hits
+ao3$comments2 <- ao3$Num_comments * ao3$Num_comments
+# views
+s1 <- lm(Num_kudos ~ Num_hits + hits2, data = ao3)
+summary(s1)
+#comments
+s2 <- lm(Num_kudos ~ Num_comments + comments2, data = ao3)
+summary(s2)
+```
+
+In both of the univariate models, all of the variables were significant, illustrating that they make be important variables to include in the overall model.
+
+## Significance of Categorical Variables
+
+To see if the categorical variables are significant to predicting the number of likes, we will use a one-way anova. This will tell us if the depedent variable (Num_kudos) changes depending on the level/subcategory of the independent variable.
+
+```{r}
+# Rating
+rating.aov <- aov(Num_kudos ~ Rating, data = ao3)
+summary(rating.aov)
+# Pairing
+pairing.aov <- aov(Num_kudos ~ Pairing, data = ao3)
+summary(pairing.aov)
+# Five_tags
+tags.aov <- aov(Num_kudos ~ Five_tags, data = ao3)
+summary(tags.aov)
+# Is_crossover
+cross.aov <- aov(Num_kudos ~ Is_crossover, data = ao3)
+summary(cross.aov)
+# Has_romance
+romance.aov <- aov(Num_kudos ~ Has_romance, data = ao3)
+summary(romance.aov)
+# Has_platonic
+platonic.aov <- aov(Num_kudos ~ Has_platonic, data = ao3)
+summary(platonic.aov)
+```
+
+According to the results of all of the different one-way ANOVA tests, all of the categorical variables seem to be significant, meaning we should look at the univariate regression results for each variable.
+
+```{r}
+# Rating
+rating.lm <- lm(Num_kudos ~ Rating, data = ao3)
+summary(rating.lm)
+# Pairing
+pairing.lm <- lm(Num_kudos ~ Pairing, data = ao3)
+summary(pairing.lm)
+# Five_tags
+tags.lm <- lm(Num_kudos ~ Five_tags, data = ao3)
+summary(tags.lm)
+# Is_crossover
+cross.lm <- lm(Num_kudos ~ Is_crossover, data = ao3)
+summary(cross.lm)
+# Has_romance
+romance.lm <- lm(Num_kudos ~ Has_romance, data = ao3)
+summary(romance.lm)
+# Has_platonic
+platonic.lm <- lm(Num_kudos ~ Has_platonic, data = ao3)
+summary(platonic.lm)
+```
+
+In the rating model, explicit is being used as a reference variable (which is the subcategory not shown in the model), meaning that the coefficients of the model show how much more or less likes a fanfiction can receive if it chose a different rating compared to a explicit rating. Of the different subcategories, mature was the only one that was not significant according to the p-value since the values of mature and explicit ratings were similar this does make some sense.
+
+For the pairing model, the 'F/F' relationship (meaning a relationship between a female and female) was the reference group. If we are to keep an alpha or significance of 0.05, three of the subcategories, 'F/M', 'Gen', and 'M/M', will not be significant, making me more hesitant to use this variable by itself, but this variable may be useful for interaction terms, so it will not be completely discarded yet.
+
+The last four binary variables all had significant coefficient, where the FALSE counterpart was the reference for all of them. The coefficients for all of the models were positive, meaning that if this item is included, then a fanfiction will likely receive more likes.
+
+## Interaction Terms
+
+To test the interaction between the two numerical variables, we can run a small regression model to see if the interaction term is significant in it.
+
+```{r}
+hits.comments <- lm(Num_kudos ~ Num_hits + Num_comments + Num_hits*Num_comments, data = ao3)
+summary(hits.comments)
+```
+
+The model above shows that the interaction term between the two numerical variables is significant and can help the model.
+
+Some categorical variable interaction that may be interesting to look into is 'Pairing' and 'Has_romance', 'Rating' and 'Has_romance', 'Five_tags' and 'Has_romance', and 'Rating' and 'Five_tags'. We, again, can use ANOVA to determine whether the interaction terms are significant or not.
+
+```{r}
+# check interaction between pairing and romance
+pair.romance <- aov(Num_kudos ~ Pairing * Has_romance, data = ao3)
+summary(pair.romance)
+# rating and romance interaction
+rate.romance <- aov(Num_kudos ~ Rating * Has_romance, data = ao3)
+summary(rate.romance)
+# five tags and romance interaction
+tags.romance <- aov(Num_kudos ~ Five_tags * Has_romance, data = ao3)
+summary(tags.romance)
+# rating and five tags
+rate.tags <- aov(Num_kudos ~ Rating * Five_tags, data = ao3)
+summary(rate.tags)
+```
+
+There does not seem to be an interaction between pairing and whether there is a romantic relationship or not, but there does seem to be an interaction between rating and whether the story contains a romantic relationship or not, which, at a glance, does make sense because with romantic relationships included in media, sometimes is does tend to contain more adult content. Additionally, it seems that there is an interaction between the top five tags and whether or not a romantic relationship is included. Rating and tags also interact with one another, which makes sense because depending on the tag it would affect the overall rating of the fanfiction.
+
+```{r}
+# rating and romance interaction
+rate.romance.lm <- lm(Num_kudos ~ Rating * Has_romance + Rating + Has_romance, data = ao3)
+summary(rate.romance.lm)
+# five tags and romance interaction
+tags.romance.lm <- lm(Num_kudos ~ Five_tags * Has_romance + Five_tags + Has_romance, data = ao3)
+summary(tags.romance.lm)
+# rating and five tags
+rate.tags.lm <- lm(Num_kudos ~ Rating * Five_tags + Rating + Five_tags, data = ao3)
+summary(rate.tags.lm)
+```
+
+## Significant Terms for the Model
+
+After doing all of these different tests, we can now list all of the potential terms that will be best for the model to fit all of the data. The numerical variables will be 'Num_hits' and 'Num_comments' because they were significant in the univariate regression results and high correlation. Although the two variables did seem to have a high correlation between themselves, when I checked the VIF of both variables, it was under 5, meaning that there was not any mutlicollinearity present. 'Num_bookmarks' could not be included, despite its high correlation, because for the purpose of the research question, the model needs to be easily able to be translated for companies and/or authors to use for there purposes, and there is not an easy way to determine whether a viewer/reader liked a story enough to save it for themselves.
+
+Of the several categorical variables, 'Rating', 'Has_romance', 'Has_platonic', 'Five_tags', and 'Is_crossover' seemed to all be good predictors for the number of likes. This was determined by doing an ANOVA to see if the variables were significant and checking the results of each variable with a univariate regression. I decided not to include the 'Pairing' column because while it was considered significant with the ANOVA, the results of the univariate regression displayed that some of the subcategories of the column were not significant. While it is usually all right for some subcategories to not be significant, the most popular subcategory 'M/M' was not considered to be significant, which lead me to not use the variable.
+
+To test for nonlinear terms for the numerical variables, I used a Ramsey Reset test to test if the numerical variables would be significant if the terms were squared. For both 'Num_hits' and 'Num_comments', they had a low p-value, meaning that squared values may be significant to the model. Then, I ran regressions including the squared term with the original term, and it showed that the terms were significant that way as well.
+
+Lastly, I tested to see if there was any interaction between variables. For the numerical variables, I ran a simple regression to see if there was interaction between 'Num_hits' and 'Num_comments'. The results of the model showed that the interaction term was significant. Additionally, there seemed to be an interaction between 'Rating' and 'Has_romance', 'Five_tags' and 'Has_romance', and 'Rating' and 'Five_tags'. This was determined by doing an ANOVA and checking with a regression model to determine if it is significant. Unfortunately, 'Pairing' and 'Has_romance' was not considered significant when I ran the ANOVA.
+
+# Model Analysis
+
+## Spliting the Data Set
+
+We need to split the data set to best determine how well a model performed, so we need to create a 'train' set for the model to learn with, and we will have a 'test' set of values that the model has never seen before and have it predict the target in the 'test' set. We also use this to calculate MAPE (mean absolute percent error) or RMSE (root mean squared error) to see how well one model performed compared to another model.
+
+In the code below, I use a 80/20 split, meaning that 80% of the data is being used as training data while the other 20% is being used for testing. Then, I use the summary command to see if the values for the numerical values are similar and the proportion of the categorical variables are similar to make sure the data was split properly.
+
+```{r}
+# set seed to have same split
+set.seed(42)
+# split data into train and test sets (80/20 split default)
+index <- sample(1:nrow(ao3),nrow(ao3)*0.8,replace=FALSE)
+train<-ao3[index,]
+test<-ao3[-index,]
+summary(train)
+summary(test)
+```
+
+Although the values in the summary table seem to be similar, we can actually test to see if the sample averages for the numerical variables and the sample proportions for the categorical variables are equal. For numerical variables, one needs to do a Welch's T-test, where the null hypothesis is that the sample averages are equal.
+
+```{r}
+# test if means are different for the numerical variables
+# views
+t.test(train$Num_hits, test$Num_hits)
+# comments
+t.test(train$Num_comments, test$Num_comments)
+# likes
+t.test(train$Num_kudos, test$Num_kudos)
+```
+
+Since all of the numerical variables had high p-values (above the standard alpha of 0.05), this means that we do not reject the null hypothesis, meaning the sample averages are equal. Next, we can test the binary categorical variables with a proportion Z-test, where the null hypothesis is that the sample proportions are equal. 
+
+```{r}
+# Has romance
+prop.test(x = c(sum(train$Has_romance),sum(test$Has_romance)), n = c(nrow(train),nrow(test)))
+# Has platonic relationships
+prop.test(x = c(sum(train$Has_platonic),sum(test$Has_platonic)), n = c(nrow(train),nrow(test)))
+# Is crossover
+prop.test(x = c(sum(train$Is_crossover),sum(test$Is_crossover)), n = c(nrow(train),nrow(test)))
+# Top five tags
+prop.test(x = c(sum(train$Five_tags),sum(test$Five_tags)), n = c(nrow(train),nrow(test)))
+```
+
+For the binary categorical variables, all had high p-values, so the sample proportions are also equal. For 'Rating', I have to do some different steps to determine the proportions.
+
+```{r}
+unique(ao3$Rating)
+# make proportion table to make sure test values are correct
+prop.table(table(train$Rating))
+prop.table(table(test$Rating))
+# test each sub category individually
+# Explicit
+prop.test(x = c(table(train$Rating)[[1]], table(test$Rating)[[1]]), n = c(nrow(train),nrow(test)))
+# General Audiences
+prop.test(x = c(table(train$Rating)[[2]], table(test$Rating)[[2]]), n = c(nrow(train),nrow(test)))
+# Mature
+prop.test(x = c(table(train$Rating)[[3]], table(test$Rating)[[3]]), n = c(nrow(train),nrow(test)))
+# Not Rated
+prop.test(x = c(table(train$Rating)[[4]], table(test$Rating)[[4]]), n = c(nrow(train),nrow(test)))
+# Teen and Up Audiences
+prop.test(x = c(table(train$Rating)[[5]], table(test$Rating)[[5]]), n = c(nrow(train),nrow(test)))
+```
+
+To use the proportion test, I have to test each subcategory individually. When I tested each one, all had a p-value above alpha, meaning that the proportions between the test and train sets are roughly equal.
+
+## Testing Models
+
+Now that we know that the data is evenly split, we can finally run the first regression model and step how well the model fits the data. In this first model, I will include all the variables that were significant without nonlinear terms or interactions.
+
+```{r}
+# install to create a combined regression table
+library(stargazer)
+# install to determine MAPE value
+library(Metrics)
+model <- lm(Num_kudos ~ Num_hits + Num_comments + Rating + Five_tags + Has_romance + Has_platonic + Is_crossover, data = train)
+summary(model)
+y_pred <- predict(model, newdata=test)
+mape(test$Num_kudos, y_pred)
+AIC(model)
+```
+
+Although all of the variables were significant, when they were univariate equations, but 'Is_crossover' and 'Rating' (minus General Audiences) no longer was significant. But, the model itself has a high R-squared value of 0.7793, meaning 77.93% of the data is explained by this model. When I calculated the MAPE, the value was 4.32%. With MAPE, this means that the average deviation between the predicted and actual values was 4.32%. The threshold of a very good MAPE score is below 10%, though a model is still considered good with a MAPE below 20%. If we were not considered nonlinear and interaction terms, I would next remove the non-significant variables and see how that changes the model.
+
+Next, I will run the model with the nonlinear and interaction terms to see if those added variables help with the overall model.
+
+```{r}
+model1 <- lm(Num_kudos ~ Num_hits + hits2 + Num_comments + comments2 + Num_hits*Num_comments + Rating + Five_tags + Has_romance + Has_platonic + Is_crossover + Rating*Five_tags + Rating*Has_romance + Five_tags*Has_romance, data = train)
+summary(model1)
+y_pred1 <- predict(model1, new_data=test)
+mape(test$Num_kudos, y_pred1)
+AIC(model1)
+```
+
+With the addition of nonlinear terms in the model, we cannot compare the R-squared values between this model and the previous model. Though we can use values like AIC and MAPE to determine if it is a model model compared to the previous model. Although the MAPE is higher than the original model, at 8.56%, it is still considered to be a good MAPE score. With the first model, it had an AIC of 412,697.7 while this model has an AIC of 362,224.9. The general guideline with AIC values to compare models is that the smaller of the two values is the better model, meaning that adding interaction terms and nonlinear terms helped the model to fit the data better.
+
+Since there is a variable in the model where it has a high p-value, which is not significant, I will remove this variable, 'Rating*Five_tags', and see how this affects the overall model.
+
+```{r}
+model2 <- lm(Num_kudos ~ Num_hits + hits2 + Num_comments + comments2 + Num_hits*Num_comments + Rating + Five_tags + Has_romance + Has_platonic + Is_crossover + Rating*Has_romance + Five_tags*Has_romance, data = train)
+summary(model2)
+y_pred2 <- predict(model2, new_data=test)
+mape(test$Num_kudos, y_pred2)
+AIC(model2)
+```
+
+With this model, the R-squared between this one and the previous one are almost the same, and this is the case with the MAPE score, too. Although the AIC is slightly higher than the previous model, all of the variables are significant (below alpha) in this model; therefore, I believe that it is a better model compared to the other nonlinear, interaction term model.
+
+Since this model has a high R-squared, a low MAPE, and significant variables, this model is good model to use to predict positive fan interaction (or likes). Both views (Num_hits) and comments (Num_comments) have positive coefficients, meaning that for every view or comment left, this will increase the number of likes. Though, with there squared terms, the coefficients are negative. The interaction term between the two numerical variables, on the other hand, has a positive coefficient, meaning that viewing and leaving a comment will increase the number of likes. For the rating, the reference was the 'Explicit' rating, so when comparing the other ratings to this one, all of them had positive coefficients, meaning if the fanfiction was rated something other than 'Explicit' it would gain more likes. For example, if a fanfiction was rated 'General Audiences', it would receive approximately 67.36 more likes rather than if it was rated 'Explicit'. For companies and authors, this means that, generally, people tend to like things that a rated differently from 'Explicit', specifically, in this case, the rating 'Teen and Up Audiences' is the most preferred (liked) rating compared to 'Explicit'. 
+
+For the Boolean variables, 'Has_romance' and 'Has_platonic' have a positive coefficient, meaning that including romantic relationships and platonic relationships in one's book, movie, or show will increase the overall positive reception of the piece of media. 'Five_tags' also received a positive coefficient, so including 'Fluff', 'Angst', 'Hurt/comfort', 'Canon Divergence', or 'Fluff and Angst' would overall increase the positive fan interaction. Unsurprisingly, having a crossover between two pieces of media decreases the overall positive fan interaction, meaning fans tend to enjoy the original story and plot of a book or movie rather than seeing the plot and characters being mixed into another piece of media. The interaction variable for rating and romance have negative coefficients for all of the possible ratings, meaning that if romance is included, the best number of likes would be achieved by having the piece of media rated 'Explicit'. The last interaction term is the top five tags with romance -- this one had some surprising results. If a piece of media contains any of the top five tags and included a romantic relationship, it would decrease the overall number of likes.
+
+## Test for Heteroskedasticity
+
+A good way to determine heteroskedasticity in the model is to test with the Breusch-Pagan Lagrange Multiplier Test.
+
+```{r}
+library(lmtest)
+bptest(model2)
+```
+
+The null hypothesis of this test is that the model is homoskedastic. Since we reject the null hypothesis, this means that the model is heteroskedastic. Below, I plot the fitted values with the residual values to look at the points more closely.
+
+```{r}
+residuals <- resid(model2)
+fitted.values <- fitted(model2)
+plot(fitted.values,residuals) + abline(0,0)
+```
+
+Looking at the plot above, one can definitely see the distinct fanning that tends to be shown with heteroskedasticity with a large dispersion of points.
+
+With heteroskedasticity, there are a couple of ways to deal with this problem, including transforming the response variable and using weighted regression. If one tries to take the log or square-root of the dependent variable, then this may cause the heteroskedasticity to disappear. Additionally, with weighed regression, which assigns a weight to each data point, can give smaller weights to data points with higher variance, which may decrease their squared-residuals, so if the right weights are used, one could eliminate heteroskedasticity in the model.
+
+## Test for Normality
+
+To see if the residuals are normally distributed, one can plot a Q-Q plot. If the points are normally distributed, the data plot will follow the line.
+
+```{r}
+# a lot pretty qqplot in this library
+library(car)
+qqPlot(residuals)
+```
+
+Once it passes the -2 and 2 quantiles the data points tend to stray away from the line, but in between those quantiles, they follow the line quite closely. Another way to visually see if the residuals are normally distributed is to look at a density plot of the residuals.
+
+```{r}
+plot(density(residuals))
+```
+
+Seeing the density plot, most of the data is hovered around the zero marker, but there seems to be a right-skew with the data. Additionally, there seems to be some residual values that are much smaller or larger than zero, meaning there may be a problem with outliers.
+
+After looking at both of the visualizations, one can see that the residuals are not normal, but to make sure of that, I will run a Jarque-Bera test, where the null hypothesis is that the data is normally distributed, and I will use the residuals to see if the residuals are normally distributed.
+
+```{r}
+library(tseries)
+# test for normality of residuals
+jarque.bera.test(residuals)
+```
+
+As one can see above, the p-value is below alpha, meaning that the residuals are not normally distributed. 
+
+## Fixing the Model
+
+Similar to fixing heteroskedasticity, a way to fix the residuals to hopefully make them normally distributed is to transform the dependent variable. So, to create a better model, I used Box-Cox transformation to determine the best type of transformation for the response variable.
+
+```{r}
+library(MASS)
+boxcox(lm(Num_kudos ~ Num_hits + hits2 + Num_comments + comments2 + Num_hits*Num_comments + Rating + Five_tags + Has_romance + Has_platonic + Is_crossover + Rating*Has_romance + Five_tags*Has_romance, data=train))
+```
+
+From the plot above, it has been determined that a log transformation of the dependent variable would best normalize the data.
+
+```{r}
+model3 <- lm(log(Num_kudos) ~ Num_hits + hits2 + Num_comments + comments2 + Num_hits*Num_comments + Rating + Five_tags + Has_romance + Has_platonic + Is_crossover + Rating*Has_romance + Five_tags*Has_romance, data = train)
+summary(model3)
+y_pred3 <- predict(model3, new_data=test)
+mape(test$Num_kudos, y_pred3)
+AIC(model3)
+```
+
+While the AIC decreased, meaning it is a better model, and the MAPE decreased too, even though the R-squared should not be compared across models, the abrupt drop still is not the nicest. Also, since 'Num_kudos' has shifted with a log transformation, I will plot the variable and take its correlation to see if the numerical variable, 'Num_hits' would also benefit from a log transformation (more so than a squared transformation). I cannot test for 'Num_comments' because there are zero values in the data set, and log(0) equals infinity, so it cannot have a log transformation.
+
+```{r}
+# only target variable log transformation
+ggplot(ao3, aes(x=Num_hits, y=log(Num_kudos))) +
+    geom_point() +
+    geom_smooth(method=lm)
+cor(ao3$Num_hits,log(ao3$Num_kudos))
+# both log transformation
+ggplot(ao3, aes(x=log(Num_hits), y=log(Num_kudos))) +
+    geom_point() +
+    geom_smooth(method=lm)
+cor(log(ao3$Num_hits),log(ao3$Num_kudos))
+```
+
+As seen above, we must also transform the 'Num_hits' variable to fit the model better, so instead of the squared transformation from before, it will be a log transformation.
+
+```{r}
+model4 <- lm(log(Num_kudos) ~ log(Num_hits) + Num_comments + comments2 + Rating + Five_tags + Has_romance + Has_platonic + Is_crossover + Num_hits*Num_comments + Rating*Has_romance + Five_tags*Has_romance, data = train)
+summary(model4)
+y_pred4 <- predict(model4, new_data=test)
+mape(test$Num_kudos, y_pred4)
+AIC(model4)
+```
+
+With this new model, while it does have a slightly higher MAPE (though it is almost negligible), the AIC of the new model is much lower than any other model that has been created so far. In this model, log 'Num_hits', 'Num_comments', 'Rating', 'Five_tags', 'Has_romance', and 'Has_platonic' all had positive coefficients, meaning that these will increase the amount of positive fan interaction (log number of likes) for a book, movie, or show. Comments squared, 'Is_crossover', and normal 'Num_hits' have negative coefficients, so it will overall decrease the positive fan interaction.
+
+With the interaction variables, as the number of views ('Num_hits') and comments increase, according to the coefficient given in the summary table, the positive fan interaction increases. With 'Rating', the reference is 'Explicit', so this means with the non-interaction term, a fanfiction performs better if it is rating something other than 'Explicit'. 'Rating' with 'Has_romance' uses 'Explicit' as a reference again, and if romance is involved, if the rating is not 'Explicit', it actually decreases the overall positive fan interaction. 'Five_tags' with 'Has_romance' has a negative coefficient as well, meaning if any top five tag is included in a story with a romantic relationship, this would decrease the overall fan interaction.
+
+Now, I check the heteroskedasticity and normality like what I did earlier with a previous model.
+
+```{r}
+residuals_m4 <- resid(model4)
+fitted.values_m4 <- fitted(model4)
+# run heteroskedasticity test again
+bptest(model4)
+# plot to see heteroskedasticity
+plot(fitted.values_m4,residuals_m4) + abline(0,0)
+```
+
+Unfortunately, it is still heteroskedastic according to the Breusch-Pagan test, but the plot's residuals are a lot smaller and tend to be clumped together -- there are not as many outliers in the plot, so compared to the previous plot, it is less heteroskedastic. Next, we use a Q-Q plot and see the density of the residuals to see if it is normally distributed.
+
+```{r}
+# see if residuals are normal
+qqPlot(residuals_m4)
+# another visual to see if residuals are normal
+plot(density(residuals_m4))
+# normal test
+jarque.bera.test(residuals_m4)
+```
+
+The Q-Q plot is much best to the previous plot though the tails of the points are not as linear, but it is more linear compared to the previous plot. Also, the density plot does look mostly normally distributed, but there is a bit of a left-skew, making it not as normal. When I do the Jarque-Bera test, it still rejects the null hypothesis, meaning the residuals are not normally distributed. Overall, this new model is better than the previous model, but it does still have issues with heteroskedasticity and normality of the residuals.
+
+## Weaknesses
+
+When analyzing the model, I found that there was a huge problem with outliers that should have been handled early in the data. If I choose to scrape data that was more fan-community specific, such as *Harry Potter*, the values would likely not be as extreme because the data set includes data for communities that do not have a lot of fan interaction due to age or being cult classics like the movie *Event Horizon*, having only a total of a little over [25 fanfictions](https://archiveofourown.org/tags/Event%20Horizon%20(1997)/works) ever created, and communities with wide spread popularity, such as *The Avengers* with over [215,000 fanfictions](https://archiveofourown.org/tags/The%20Avengers%20(Marvel%20Movies)/works), having tons a fans interact with that content.
+
+Additionally,despite my attempts and transforming this model, I could not make the errors and residuals homoskedastic and normally distributed, meaning that a weighed regression may need to be used to fix those issues. Though, the log transformation did help the heteroskedasticity and non-normality a bit, which is shown in the plots above.
+
+# Conclusion
+
+AO3 is a website containing tons of stories that fans interact with every day by either writing or reading. When fans look for more content for a series, after checking officially released options, they tend to go to this site. With its comprehensive tagging system, it is consider to be the best of the fanfiction sites out there, and the site does really well with providing data. Because of this, it is a great option to use to determine what tags, ratings, or relationships would best help a series if they wished to see what fans interacted with the most. But, it can also give insight to the broader view of what is generally liked as well if one wishes to create a new book or movie.
+
+With this model, one can prediction the the amount of positive fan interaction (likes) that a book, movie, or show may have given certain variables, such as number of views, what rating it has, types of relationships (if there are any), and different tags (different broad tropes) used. This can be beneficial for media companies, groups, or individuals. For example, it can help an author determine what tropes, ratings, and relationships to have if they are writing a new book, and this can help to determine if its broad ideas can gain traction. Additionally, this can be beneficial for companies who may be creating a sequel to a series, where if they tailor the data to be more genre or series specific, they can see how well the fan community will receive an idea.
+
+By helping to determine what gains positive fan interactions, this can help with the retention of current fans of a series while it can also help to bring in new viewers/readers. Since I used a data set consisting of all possible medias of books, shows, or movies, I create a model that would be beneficial in determining the best broad idea for a general audience. If one were to web scrape more specific data, such as only scraping *The Reckoners* series content, they one can find what is best for for that series specifically.
+
+Therefore, if the media company or individual author wishes to determine the amount of positive fan interaction, one can use the model to at least figure out some of the more broader aspects that should be in the piece of media. One can determine whether romantic or platonic relationships should be include (and be prominent) or whether one should add key concepts with the top five tags given in the works, such as including cute and happy content (fluff) or including sadder content (angst). Hopefully, it will help to attract both veteran fans and newcomers into the series by including concepts that were generally well-received by using a website that thrives from fan interaction.
