@@ -27,4 +27,4 @@ By using the AO3 data, different popular media companies and independent writers
  
 To use this application, one will need to download [this](https://drive.google.com/file/d/1fo9bNmBmMJeZ9AUkP2ZQ0rbMCB05czkn/view?usp=share_link) data set into the "R-shiny" folder.
  
-Additionally, this application would not compile on my R-Studio, so I do not know if it actually workd presently. This is something that will be fix in the future, but for the moment, it is just code.
+Additionally, one can access this application by using [this link](https://emklaehn.shinyapps.io/AO3_R-shiny_Regression/). Here one can play around with the data set and find other potential regression models to use.
