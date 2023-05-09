@@ -19,30 +19,43 @@ library(ggplot2)
 library(tidyverse)
 library(DT)
 library(plotly)
-library(corrplot)
 library(caret)
+library(shinycssloaders)
 
 ao3_new <- read.csv("ao3_new.csv")
+# change date into Date type
+ao3_new$Date_updated <- as.Date(ao3_new$Date_updated, format="%d %B %Y")
+# change categorical variables like Rating and Complete into factors
+ao3_new$Complete <- as.factor(ao3_new$Complete)
+ao3_new$Rating <- as.factor(ao3_new$Rating)
+ao3_new$Pairing <- as.factor(ao3_new$Pairing)
+ao3_new$Warning <- as.factor(ao3_new$Warning)
+choice = c("Rating", "Pairing","Complete","Word_count","Num_chapters", "Num_comments",
+           "Num_kudos","Num_bookmarks","Num_hits","Is_crossover","Has_romance",
+           "Has_platonic","Num_romance","Num_platonic","Num_character","Fluff",
+           "Angst","Hurt_comfort","AU","Fluff_angst","Five_tags","hits2","comments2")
+descript <- "This R shiny app will let you create a regression using the different variables given."
 
 # Define UI for application 
 ui <- dashboardPage(
-    dashboardBody(
-    fluidPage(
+  dashboardHeader(title = "AO3 Regression"), dashboardSidebar(descript),
+        dashboardBody(
+        fluidPage(
         box(
             selectInput(
                 "SelectX",
                 label = "Select variables:",
-                choices = names(ao3_new),
+                choices = choice,
                 multiple = TRUE,
-                selected = names(ao3_new)
+                selected = NULL
             ),
             solidHeader = TRUE,
-            width = "3",
+            width = "10",
             status = "primary",
             title = "X variable"
         ),
         box(
-            selectInput("SelectY", label = "Select variable to predict:", choices = names(mtcars)),
+            selectInput("SelectY", label = "Select variable to predict:", choices = choice),
             solidHeader = TRUE,
             width = "3",
             status = "primary",
@@ -51,10 +64,7 @@ ui <- dashboardPage(
         
         
         
-    )), fluidPage(
-
-    # Application title
-    titlePanel("Positive Fan Interaction Model"),
+    ), fluidPage(
 
     tabBox(
         id = "tabset1",
@@ -77,13 +87,13 @@ ui <- dashboardPage(
                 title = "Model Summary"
             )
         )
-)))
+))))
 
 # Define server logic 
 server <- function(input, output) {
     # Dataset
     ao3_data <- reactive({
-        ao3
+        ao3_new
     })
     
     model <- reactive({
@@ -91,11 +101,11 @@ server <- function(input, output) {
             dt <- ao3_new
         }
         else{
-            dt <- ao3_new[, c(input$SelectX)]
+            dt <- ao3_new[, c(input$SelectX,input$SelectY)]
         }
     })
     # Data output
-    output$Data <- renderDT(ao3_data())
+    output$Data <- renderDT(ao3_data(),options = list(scrollX = TRUE))
     
     # split data
     set.seed(24)  
